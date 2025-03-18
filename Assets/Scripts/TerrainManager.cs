@@ -11,6 +11,7 @@ public class TerrainManager : MonoBehaviour
     [Space(10)]
     [Header("Terrain Variables")]
     [Space(5)]
+    public float verticalScale;
     public float resolution;
     public int numberOfOctaves;
     public float lacunarity;
@@ -34,6 +35,6 @@ public class TerrainManager : MonoBehaviour
         noiseHeights = TerrainGeneration.GenerateHeightMap(meshWidth, meshDepth, resolution, 
                                                                     numberOfOctaves, lacunarity, persistance);
 
-        GetComponent<MeshFilter>().mesh = TerrainGeneration.GenerateMesh(noiseHeights);
+        GetComponent<MeshFilter>().mesh = TerrainGeneration.GenerateMesh(noiseHeights, verticalScale);
     }
 }

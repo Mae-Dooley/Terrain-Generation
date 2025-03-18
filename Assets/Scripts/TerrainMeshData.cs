@@ -3,6 +3,7 @@ using UnityEngine;
 public class TerrainMeshData
 {
     public Vector3[] vertices;
+    public Vector2[] uvs;
     public int[] triangles;
 
     private int trianglesIndex;
@@ -11,6 +12,9 @@ public class TerrainMeshData
     {
         //Vertices are the vector coordinates of each vertex
         vertices = new Vector3[width * depth];
+
+        //uvs tell each vertex where to look on the texture map
+        uvs = new Vector2[width * depth];
 
         //The triangles array is a list of integers that reference the vertices array
         //The "internal" space of the array is (width-1)(depth-1)

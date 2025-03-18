@@ -80,43 +80,55 @@ public static class TerrainGeneration
         return terrainHeightArray;
     }
     
-    public static Mesh GenerateMesh(float[,] terrainHeights)
+    public static Mesh GenerateMesh(float[,] terrainHeights, float verticalScale)
     {
         int terrainWidth = terrainHeights.GetLength(0);
         int terrainDepth = terrainHeights.GetLength(1);
 
+        //We want the mesh to be centred on (0, 0). We divide the inner width/depth (spaces between vertices) by 2
+        float widthOffset = (terrainWidth - 1) / 2f;
+        float depthOffset = (terrainDepth - 1) / 2f; 
+
         TerrainMeshData meshData = new TerrainMeshData(terrainWidth, terrainDepth);
 
-        //Assign the coordinates of all the vertices
+
+        //We can assign all the necessary data in one pass by creating a row and column index from the linear i
         for (int i = 0; i < meshData.vertices.Length; i++) {
             //Convert linear i to row and column based on the terrain grid
             int row = i / terrainWidth;
             int column = i % terrainWidth;
 
-            meshData.vertices[i] = new Vector3(column, terrainHeights[column, row], row);
-        }
+            //Assign the coordinates of the vertices 
+            meshData.vertices[i] = new Vector3(column - widthOffset, verticalScale * terrainHeights[column, row], 
+                                                                                    row - widthOffset);
+            
+            //Assign the uvs
+            //As I understand it, the uv vector of each vertex tells it where to get its colour from a texture map
+            //I will therefore give it a texture based on its height
+            //terrainHeights is normalized and so it is used as a direct reference to the texture map
+            meshData.uvs[i] = new Vector2(Random.Range(0, 1), terrainHeights[column, row]);
 
-        //Assign all the triangle indices
-        // The triangles fit in the inner space of the grid and so we ignore the final row and column
-        for (int i = 0; i < terrainDepth - 1; i++) {
-            for (int j = 0; j < terrainWidth - 1; j++) {
-                //We go to each vertex and create the two triangles that span to its lower right
-                int topLeftIndex = i * terrainWidth + j;
+            //Assign all the triangle indices
+            //The triangles fit in the inner space of the grid and so we ignore the final row and column
+            if (column != terrainWidth - 1 && row != terrainDepth - 1) {
+                //Add the indices in anti-clockwise order so the normal is directed along positive y
 
                 //The triangle in the top right of the cell inner space
-                meshData.AddTriangleToMesh(topLeftIndex, topLeftIndex + terrainWidth + 1, topLeftIndex + 1);
+                meshData.AddTriangleToMesh(i, i + terrainWidth + 1, i + 1);
 
                 //The triangle in the bottom left of the cell inner space
-                meshData.AddTriangleToMesh(topLeftIndex, topLeftIndex + terrainWidth, 
-                                                    topLeftIndex + terrainWidth + 1);
+                meshData.AddTriangleToMesh(i, i + terrainWidth, i + terrainWidth + 1);
             }
         }
 
         //Create the mesh in unity
         Mesh mesh = new Mesh();
         mesh.vertices = meshData.vertices;
-        //UVS?
+        mesh.uv = meshData.uvs;
         mesh.triangles = meshData.triangles;
+
+        //Recalculate the normal vectors to ensure the unity lighting is correct
+        mesh.RecalculateNormals();
 
         return mesh;
     }
