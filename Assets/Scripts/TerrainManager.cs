@@ -7,6 +7,7 @@ public class TerrainManager : MonoBehaviour
     [Space(5)]
     public int meshWidth;
     public int meshDepth;
+    public AnimationCurve meshHeightCurve;
 
     [Space(10)]
     [Header("Terrain Variables")]
@@ -35,6 +36,7 @@ public class TerrainManager : MonoBehaviour
         noiseHeights = TerrainGeneration.GenerateHeightMap(meshWidth, meshDepth, resolution, 
                                                                     numberOfOctaves, lacunarity, persistance);
 
-        GetComponent<MeshFilter>().mesh = TerrainGeneration.GenerateMesh(noiseHeights, verticalScale);
+        GetComponent<MeshFilter>().mesh = TerrainGeneration.GenerateMesh(noiseHeights, verticalScale, 
+                                                                                        meshHeightCurve);
     }
 }

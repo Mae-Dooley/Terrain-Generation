@@ -80,7 +80,7 @@ public static class TerrainGeneration
         return terrainHeightArray;
     }
     
-    public static Mesh GenerateMesh(float[,] terrainHeights, float verticalScale)
+    public static Mesh GenerateMesh(float[,] terrainHeights, float verticalScale, AnimationCurve meshHeightCurve)
     {
         int terrainWidth = terrainHeights.GetLength(0);
         int terrainDepth = terrainHeights.GetLength(1);
@@ -99,14 +99,15 @@ public static class TerrainGeneration
             int column = i % terrainWidth;
 
             //Assign the coordinates of the vertices 
-            meshData.vertices[i] = new Vector3(column - widthOffset, verticalScale * terrainHeights[column, row], 
+            meshData.vertices[i] = new Vector3(column - widthOffset, 
+                                        verticalScale * meshHeightCurve.Evaluate(terrainHeights[column, row]), 
                                                                                     row - widthOffset);
             
             //Assign the uvs
             //As I understand it, the uv vector of each vertex tells it where to get its colour from a texture map
             //I will therefore give it a texture based on its height
             //terrainHeights is normalized and so it is used as a direct reference to the texture map
-            meshData.uvs[i] = new Vector2(Random.Range(0, 1), terrainHeights[column, row]);
+            meshData.uvs[i] = new Vector2(Random.Range(0f, 1f), terrainHeights[column, row]);
 
             //Assign all the triangle indices
             //The triangles fit in the inner space of the grid and so we ignore the final row and column
